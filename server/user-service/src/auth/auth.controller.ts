@@ -9,17 +9,29 @@ import { LoginDto } from './dto/login.dto';
 export class AuthController {
     constructor(
         private authService: AuthService,
-        private userService: UserService,
     ) { }
 
     @Post('register')
     async register(@Body() body: RegisterDto) {
-        return this.userService.register(body);
+        const response = await this.authService.register(body);
+        if (response) {
+            return {
+                EC: 0,
+                message: 'Đăng ký thành công',
+                data: response,
+            };
+        }
     }
 
     @Post('login')
     async login(@Body() body: LoginDto) {
-        const user = await this.authService.validateUser(body.email, body.password);
-        return this.authService.login(user);
+        const response = await this.authService.login(body.email, body.password);
+        if (response) {
+            return {
+                EC: 0,
+                message: 'Đăng nhập thành công',
+                data: response,
+            };
+        }
     }
 }
