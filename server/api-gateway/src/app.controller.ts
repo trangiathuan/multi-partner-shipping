@@ -17,7 +17,7 @@ export class AppController {
 
         const serviceMap = {
             '/auth': 'http://localhost:8001', // Sử dụng biến môi trường nếu cần
-            '/user': userServiceUrl,
+            '/user': 'http://localhost:8001',
             '/shipment': 'http://localhost:4002',
             '/partner': 'http://localhost:4003',
             '/tracking': 'http://localhost:4004',

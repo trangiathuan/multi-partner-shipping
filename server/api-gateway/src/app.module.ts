@@ -14,10 +14,15 @@ import { MulterMiddleware } from './multer.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    // Chỉ apply MulterMiddleware cho các route cần upload file (ví dụ: /api/user/upload)
     consumer
-      .apply(MulterMiddleware, AuthMiddleware) // multer trước, auth sau
+      .apply(MulterMiddleware)
+      .forRoutes({ path: 'api/user/upload', method: RequestMethod.POST });
+
+    // AuthMiddleware cho tất cả các route (trừ login/register)
+    consumer
+      .apply(AuthMiddleware)
       .exclude(
-        // trừ cácr route không cần auth
         { path: 'api/auth/login', method: RequestMethod.POST },
         { path: 'api/auth/register', method: RequestMethod.POST }
       )

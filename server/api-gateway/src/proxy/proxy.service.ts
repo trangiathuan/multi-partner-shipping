@@ -14,6 +14,7 @@ export class ProxyService {
         // Clone và chỉnh sửa headers
         const headers = { ...req.headers };
         delete headers['host']; // bỏ host tránh lỗi
+        delete headers['content-length']; // xóa content-length để axios tự set lại
 
         let data = req.body;
 
@@ -24,12 +25,17 @@ export class ProxyService {
             // Thêm fields thường (form fields)
             for (const key in req.body) {
                 if (Object.prototype.hasOwnProperty.call(req.body, key)) {
-                    formData.append(key, req.body[key]);
+                    // Nếu là mảng (nhiều file cùng fieldname), append từng phần tử
+                    if (Array.isArray(req.body[key])) {
+                        req.body[key].forEach((v: any) => formData.append(key, v));
+                    } else {
+                        formData.append(key, req.body[key]);
+                    }
                 }
             }
 
             // Thêm file(s)
-            req.files.forEach((file) => {
+            req.files.forEach((file: any) => {
                 formData.append(file.fieldname, file.buffer, {
                     filename: file.originalname,
                     contentType: file.mimetype,
@@ -38,8 +44,9 @@ export class ProxyService {
             });
 
             data = formData;
-            // Gán lại đúng header content-type từ formData
-            headers['content-type'] = `multipart/form-data; boundary=${formData.getBoundary()}`;
+            // Để FormData tự set content-type, xóa content-type cũ nếu có
+            delete headers['content-type'];
+            Object.assign(headers, formData.getHeaders());
         }
 
         const response$ = this.httpService.request({
@@ -47,8 +54,7 @@ export class ProxyService {
             url,
             headers,
             data,
-            // Quan trọng: đối với multipart/form-data, phải để transformRequest mặc định (axios) mới gửi đúng
-            // Nếu cần, bạn có thể thêm timeout, validateStatus, ...
+
         });
 
         const response = await lastValueFrom(response$);
