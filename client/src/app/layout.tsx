@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
-
-
+import Sidebar from "@/components/layout/Sidebar";
+import { SidebarProvider } from "@/context/SidebarContext";
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 export const metadata: Metadata = {
   title: "Hệ thống quản lý - Vận chuyển đa đối tác",
@@ -15,10 +16,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="vi">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        />
+      </head>
       <body>
-        <Navbar />
-        {children}
+        <SidebarProvider>
+          <Navbar />
+          <div className="flex">
+            <Sidebar />
+            <main className="min-h-screen">
+              {children}
+            </main>
+          </div>
+        </SidebarProvider>
       </body>
     </html>
   );

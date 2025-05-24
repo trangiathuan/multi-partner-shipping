@@ -13,10 +13,8 @@ RUN npm install
 # Copy toàn bộ code vào container
 COPY . .
 
-# Expose port NestJS (default 8888)
-EXPOSE 8001
+# Expose port (api-gateway mặc định chạy 8000)
+EXPOSE 8000
 
-RUN npx prisma generate
-
-# Run in dev mode with hot reload
+# Run in dev mode
 CMD ["npm", "run", "start"]

@@ -17,6 +17,7 @@ export class AppModule implements NestModule {
     consumer
       .apply(MulterMiddleware, AuthMiddleware) // multer trước, auth sau
       .exclude(
+        // trừ cácr route không cần auth
         { path: 'api/auth/login', method: RequestMethod.POST },
         { path: 'api/auth/register', method: RequestMethod.POST }
       )

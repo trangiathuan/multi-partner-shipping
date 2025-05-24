@@ -1,17 +1,22 @@
 import { Controller, All, Req, Res } from '@nestjs/common';
 import { ProxyService } from './proxy/proxy.service';
 import { Request, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('api')
 export class AppController {
-    constructor(private readonly proxyService: ProxyService) { }
+    constructor(
+        private readonly proxyService: ProxyService,
+        private readonly configService: ConfigService
+    ) { }
 
     @All('*') // Bắt tất cả phương thức và route dưới /api
     async proxy(@Req() req: Request, @Res() res: Response) {
-        // Mapping path -> service URL (bạn có thể dùng config động hơn)
+        // Mapping path -> service URL (dùng biến môi trường)
+        const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL') || 'http://user-service:8001';
         const serviceMap = {
-            '/auth': 'http://localhost:8001',
-            '/user': 'http://localhost:4001',
+            '/auth': userServiceUrl,
+            '/user': userServiceUrl,
             '/shipment': 'http://localhost:4002',
             '/partner': 'http://localhost:4003',
             '/tracking': 'http://localhost:4004',
