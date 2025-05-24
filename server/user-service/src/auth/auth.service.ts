@@ -1,29 +1,25 @@
 import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserEntity } from 'src/user/entity/user.entity';
 import * as bcrypt from 'bcrypt';
-import e from 'express';
 
 @Injectable()
 export class AuthService {
     constructor(
         private jwtService: JwtService,
-        private prisma: PrismaService
+        private prisma: PrismaService,
     ) { }
 
-    async register(data: {
-        email: string; password: string; full_name: string; phone?: string; role?: 'customer' | 'shipper' | 'admin' | 'partner';
-    }) {
+    async register(data: { email: string; password: string; full_name: string; phone?: string; role?: 'customer' | 'shipper' | 'admin' | 'partner'; }) {
         try {
-
             const existingUser = await this.prisma.user.findUnique({
                 where: { email: data.email },
             });
             if (existingUser) {
                 throw new ForbiddenException('Email đã được đăng ký');
             }
-
-            const password_hash = await bcrypt.hash(data.password, 10);
+            const password_hash = await UserEntity.hashPassword(data.password);
             const user = await this.prisma.user.create({
                 data: {
                     email: data.email,
@@ -46,7 +42,8 @@ export class AuthService {
                 throw new NotFoundException('Tài khoản không tồn tại');
             }
 
-            const isPasswordMatch = await bcrypt.compare(password, user.password_hash);
+            const isPasswordMatch = await UserEntity.isPasswordMatch(password, user.password_hash);
+
             if (!isPasswordMatch) {
                 throw new UnauthorizedException('Mật khẩu không chính xác');
             }

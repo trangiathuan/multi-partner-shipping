@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  customer
+  shipper
+  admin
+  partner
+}
+
+enum ShipmentStatus {
+  created
+  accepted
+  shipping
+  delivered
+  failed
+}
+
+enum PaymentMethod {
+  stripe
+  momo
+  vnpay
+  // thêm method khác nếu cần
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  refunded
+}
+
+enum ReconciliationStatus {
+  pending
+  confirmed
+}
+
+enum NotificationMethod {
+  email
+  sms
+}
+
+enum NotificationStatus {
+  sent
+  failed
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  password_hash String
+  role         Role      @default(customer)
+  full_name    String
+  phone        String?
+  created_at   DateTime  @default(now())
+
+  // quan hệ
+  shipmentsAsCustomer Shipment[] @relation("customerShipments")
+  shipmentsAsPartner  Shipment[] @relation("partnerShipments")
+  notifications       Notification[]
+
+  shipperLocations    ShipperLocation[]
+}
+
+model Shipment {
+  id               String          @id @default(uuid())
+  customer_id      String
+  sender_name      String
+  sender_address   String
+  receiver_name    String
+  receiver_address String
+  weight           Float
+  dimension        Json
+  partner_id       String?
+  status           ShipmentStatus  @default(created)
+  created_at       DateTime       @default(now())
+
+  // quan hệ
+  customer    User       @relation("customerShipments", fields: [customer_id], references: [id])
+  partner     User?      @relation("partnerShipments", fields: [partner_id], references: [id])
+  payments    Payment[]
+  status_logs ShipmentStatusLog[]
+}
+
+model ShipmentStatusLog {
+  id          String         @id @default(uuid())
+  shipment_id String
+  status      ShipmentStatus
+  updated_at  DateTime       @default(now())
+  source      String
+
+  shipment Shipment @relation(fields: [shipment_id], references: [id])
+}
+
+model Partner {
+  id       String   @id @default(uuid())
+  name     String
+  api_url  String
+  api_key  String
+  active   Boolean  @default(true)
+  config   Json
+
+  // có thể liên kết với User nếu muốn
+}
+
+model Payment {
+  id          String         @id @default(uuid())
+  shipment_id String
+  amount      Decimal
+  method      PaymentMethod
+  status      PaymentStatus  @default(pending)
+  paid_at     DateTime?
+
+  shipment Shipment @relation(fields: [shipment_id], references: [id])
+}
+
+model Reconciliation {
+  id           String              @id @default(uuid())
+  partner_id   String
+  period_start DateTime
+  period_end   DateTime
+  total_amount Decimal
+  status       ReconciliationStatus @default(pending)
+
+  // nếu muốn liên kết partner entity
+  // partner Partner @relation(fields: [partner_id], references: [id])
+}
+
+model Notification {
+  id         String             @id @default(uuid())
+  user_id    String
+  content    String
+  method     NotificationMethod
+  status     NotificationStatus @default(sent)
+  created_at DateTime           @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model ShipperLocation {
+  id         String    @id @default(uuid())
+  shipper_id String
+  latitude   Float
+  longitude  Float
+  updated_at DateTime  @default(now())
+
+  shipper User @relation(fields: [shipper_id], references: [id])
+}

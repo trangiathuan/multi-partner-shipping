@@ -13,9 +13,10 @@ export class AppController {
     @All('*') // Bắt tất cả phương thức và route dưới /api
     async proxy(@Req() req: Request, @Res() res: Response) {
         // Mapping path -> service URL (dùng biến môi trường)
-        const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL') || 'http://user-service:8001';
+        const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL');
+
         const serviceMap = {
-            '/auth': userServiceUrl,
+            '/auth': 'http://localhost:8001', // Sử dụng biến môi trường nếu cần
             '/user': userServiceUrl,
             '/shipment': 'http://localhost:4002',
             '/partner': 'http://localhost:4003',
@@ -35,7 +36,10 @@ export class AppController {
             const data = await this.proxyService.forwardRequest(serviceUrl, req);
             return res.json(data);
         } catch (err) {
-            return res.status(err?.response?.status || 500).json({ error: err.message });
+            console.log('Proxy error:', err?.response?.data || err);
+            const status = err?.response?.status || 500;
+            const data = err?.response?.data || { error: err.message };
+            return res.status(status).json(data);
         }
     }
 }
