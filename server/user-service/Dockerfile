@@ -19,4 +19,4 @@ EXPOSE 8001
 RUN npx prisma generate
 
 # Run in dev mode with hot reload
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:dev"]

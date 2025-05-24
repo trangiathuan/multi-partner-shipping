@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8000
 
 # Run in dev mode
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:dev"]
