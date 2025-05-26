@@ -20,6 +20,15 @@ export class CreateShipmentDto {
     @IsNumber()
     weight: number;
 
+    @IsNumber()
+    length: number;
+
+    @IsNumber()
+    width: number;
+
+    @IsNumber()
+    height: number;
+
     @IsNotEmpty()
     dimension: string;
 
@@ -35,4 +44,6 @@ export class CreateShipmentDto {
     @IsOptional()
     @IsUUID()
     partnerId?: string;
+
+
 }

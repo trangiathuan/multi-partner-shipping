@@ -6,6 +6,7 @@ import { AhamoveStrategy } from './strategy/ahamove.strategy';
 import { ShipmentStrategy } from './strategy/shipment.strategy.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { ShipmentEntity } from './entity/shipment.entity';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ShipmentService {
@@ -35,6 +36,9 @@ export class ShipmentService {
                 receiver_name: dto.receiverName,
                 receiver_address: dto.receiverAddress,
                 weight: dto.weight,
+                width: dto.width,
+                length: dto.length,
+                height: dto.height,
                 dimension: dto.dimension, // Nếu là JSON thì cần parse
                 partner_id: dto.partnerId ?? null,
                 status: 'created',
