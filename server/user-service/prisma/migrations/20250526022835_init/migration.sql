@@ -1,9 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('customer', 'shipper', 'admin', 'partner');
 
@@ -24,12 +18,6 @@ CREATE TYPE "NotificationMethod" AS ENUM ('email', 'sms');
 
 -- CreateEnum
 CREATE TYPE "NotificationStatus" AS ENUM ('sent', 'failed');
-
--- DropTable
-DROP TABLE "users";
-
--- DropEnum
-DROP TYPE "UserRole";
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -53,6 +41,9 @@ CREATE TABLE "Shipment" (
     "receiver_name" TEXT NOT NULL,
     "receiver_address" TEXT NOT NULL,
     "weight" DOUBLE PRECISION NOT NULL,
+    "length" DOUBLE PRECISION NOT NULL,
+    "width" DOUBLE PRECISION NOT NULL,
+    "height" DOUBLE PRECISION NOT NULL,
     "dimension" JSONB NOT NULL,
     "partner_id" TEXT,
     "status" "ShipmentStatus" NOT NULL DEFAULT 'created',

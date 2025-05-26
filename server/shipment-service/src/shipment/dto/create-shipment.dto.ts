@@ -23,6 +23,15 @@ export class CreateShipmentDto {
     @IsNotEmpty()
     dimension: string;
 
+    @IsNotEmpty()
+    senderPhone: string;
+
+    @IsNotEmpty()
+    receiverPhone: string;
+
+    @IsNumber()
+    fee: number;
+
     @IsOptional()
     @IsUUID()
     partnerId?: string;

@@ -75,10 +75,14 @@ model Shipment {
   receiver_name    String
   receiver_address String
   weight           Float
+  length         Float
+  width          Float
+  height         Float
   dimension        Json
   partner_id       String?
   status           ShipmentStatus  @default(created)
   created_at       DateTime       @default(now())
+  
 
   // quan hệ
   customer    User       @relation("customerShipments", fields: [customer_id], references: [id])
