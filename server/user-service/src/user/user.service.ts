@@ -12,7 +12,7 @@ export class UserService {
         const { id, password, role, fullName, phone } = body;
 
         // Kiểm tra xem người dùng có quyền cập nhật không
-        const user = await this.prisma.user.findUnique({ where: { id } });
+        const user = await this.prisma.users.findUnique({ where: { id } });
         if (!user) throw new NotFoundException('Tài khỏan không tồn tại');
 
         // Mã hóa mật khẩu nếu có thay đổi
@@ -30,7 +30,7 @@ export class UserService {
             data.phone = phone;
         }
 
-        return this.prisma.user.update({
+        return this.prisma.users.update({
             where: { id },
             data: {
                 ...data,
@@ -39,6 +39,6 @@ export class UserService {
     }
 
     async findById(id: string) {
-        return this.prisma.user.findUnique({ where: { id } });
+        return this.prisma.users.findUnique({ where: { id } });
     }
 }

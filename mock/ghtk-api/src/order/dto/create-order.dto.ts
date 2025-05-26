@@ -19,8 +19,11 @@ export class CreateOrderDto {
     @ApiProperty({ example: '0987654321' })
     receiver_phone: string;
 
+    @ApiProperty({ example: 'Mô tả đơn hàng' })
+    description: string;
+
     @ApiProperty({ example: 45000 })
-    fee: number;
+    price: number;
 
     @ApiProperty({ example: 'created' })
     status: string;

@@ -12,14 +12,14 @@ export class AuthService {
 
     async register(data: { email: string; password: string; full_name: string; phone?: string; role?: 'customer' | 'shipper' | 'admin' | 'partner'; }) {
         try {
-            const existingUser = await this.prisma.user.findUnique({
+            const existingUser = await this.prisma.users.findUnique({
                 where: { email: data.email },
             });
             if (existingUser) {
                 throw new ForbiddenException('Email đã được đăng ký');
             }
             const password_hash = await UserEntity.hashPassword(data.password);
-            const user = await this.prisma.user.create({
+            const user = await this.prisma.users.create({
                 data: {
                     email: data.email,
                     password_hash,
@@ -36,7 +36,7 @@ export class AuthService {
 
     async login(email: string, password: string) {
         try {
-            const user = await this.prisma.user.findUnique({ where: { email } });
+            const user = await this.prisma.users.findUnique({ where: { email } });
             if (!user) {
                 throw new NotFoundException('Tài khoản không tồn tại');
             }

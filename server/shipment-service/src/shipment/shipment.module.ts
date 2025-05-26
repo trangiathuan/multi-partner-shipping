@@ -4,11 +4,10 @@ import { ShipmentController } from './shipment.controller';
 import { ShipmentService } from './shipment.service';
 import { GHTKStrategy } from './strategy/ghtk.strategy';
 import { HttpModule } from '@nestjs/axios';
-import { AhamoveStrategy } from './strategy/ahamove.strategy';
 
 @Module({
   imports: [HttpModule],
   controllers: [ShipmentController],
-  providers: [ShipmentService, GHTKStrategy, AhamoveStrategy],
+  providers: [ShipmentService, GHTKStrategy],
 })
 export class ShipmentModule { }

@@ -3,16 +3,17 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ShipmentStrategy } from './shipment.strategy.interface';
 import { CreateShipmentDto } from '../dto/create-shipment.dto';
+import { CalculateFreightDto } from '../dto/calculate-freight.dto';
 
 @Injectable()
 export class GHTKStrategy implements ShipmentStrategy {
-    constructor(private httpService: HttpService) { }
-
+    private readonly API_KEY: string;
+    constructor(private httpService: HttpService) {
+        this.API_KEY = process.env.API_KEY || '';
+    }
 
     async createOrder(dto: CreateShipmentDto): Promise<any> {
-        const url = process.env.GHTK_API_URL || '';
-        const API_KEY = process.env.GHTK_API_KEY;
-
+        const url = process.env.GHTK_CREATE_ORDER_API || '';
         // Tạo order_code là chuỗi 15 số ngẫu nhiên
         const order_code = Array.from({ length: 15 }, () => Math.floor(Math.random() * 10)).join('');
         const payload = {
@@ -23,15 +24,48 @@ export class GHTKStrategy implements ShipmentStrategy {
             receiver_name: dto.receiverName,
             receiver_address: dto.receiverAddress,
             receiver_phone: dto.receiverPhone,
-            fee: dto.fee, // bạn cần truyền fee từ logic tính phí bên ngoài
+            description: dto.description || '',
+            price: dto.price,
             status: 'created',
+            length: dto.length,
+            width: dto.width,
+            height: dto.height,
+            weight: dto.weight,
             // created_at sẽ do DB tự động sinh
         };
-
-        const res = await this.httpService.axiosRef.post(url, payload, {
-            headers: { 'x-api-key': API_KEY },
-        });
-
-        return res.data;
+        try {
+            const res = await this.httpService.axiosRef.post(url, payload, {
+                headers: { 'x-api-key': this.API_KEY },
+            });
+            return res.data;
+        } catch (error) {
+            console.error('GHTK API error:', error?.response?.data || error.message || error);
+            throw error;
+        }
+    }
+    async calculateFreight(dto: CalculateFreightDto): Promise<any> {
+        const url = process.env.GHTK_CAL_FEE_API || '';
+        const payload = {
+            sender_province: dto.sender_province,
+            sender_address: dto.sender_address,
+            sender_phone: dto.sender_phone,
+            sender_name: dto.sender_name,
+            receiver_province: dto.receiver_province,
+            receiver_address: dto.receiver_address,
+            receiver_phone: dto.receiver_phone,
+            receiver_name: dto.receiver_name,
+            weight: dto.weight,
+            length: dto.length,
+            width: dto.width,
+            height: dto.height,
+        };
+        try {
+            const res = await this.httpService.axiosRef.post(url, payload, {
+                headers: { 'x-api-key': this.API_KEY },
+            });
+            return res.data;
+        } catch (error) {
+            console.log('GHTK API error:', error?.response?.data || error.message || error);
+        }
     }
 }

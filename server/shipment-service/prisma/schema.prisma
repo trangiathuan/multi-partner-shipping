@@ -1,5 +1,3 @@
-// schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,7 +8,7 @@ datasource db {
 }
 
 // ENUMS
-enum role {
+enum user_role {
   customer
   shipper
   admin
@@ -54,103 +52,128 @@ enum notification_status {
 
 // MODELS
 
-model user {
-  id                   String             @id @default(uuid())
-  email                String             @unique
-  password_hash        String
-  role                 role               @default(customer)
-  full_name            String
-  phone                String?
-  created_at           DateTime           @default(now())
+model users {
+  id             String              @id @default(uuid()) @db.Uuid
+  email          String              @unique
+  password_hash  String
+  role           user_role           @default(customer)
+  full_name      String?
+  phone          String?
+  created_at     DateTime            @default(now()) @db.Timestamptz(6)
 
-  shipments_as_customer Shipment[]        @relation("CustomerShipments")
-  shipments_as_partner  Shipment[]        @relation("PartnerShipments")
-  notifications         notification[]
-  shipper_locations     shipper_location[]
+  // Relations
+  shipments          shipments[]            @relation("UserShipments")
+  notifications      notifications[]
+  shipper_locations  shipper_locations[]
+
+  @@map("users")
 }
 
-model Shipment {
-  id               String               @id @default(uuid())
-  customer_id      String
-  sender_name      String
-  sender_address   String
-  receiver_name    String
-  receiver_address String
-  weight           Float
-  length           Float
-  width            Float
-  height           Float
-  dimension        Json
-  partner_id       String?
-  status           shipment_status      @default(created)
-  created_at       DateTime             @default(now())
+model partners {
+  id        String            @id @default(uuid()) @db.Uuid
+  name      String
+  api_url   String?
+  api_key   String?
+  active    Boolean           @default(true)
+  config    Json?
 
-  customer         user                 @relation("CustomerShipments", fields: [customer_id], references: [id])
-  partner          user?                @relation("PartnerShipments", fields: [partner_id], references: [id])
-  status_logs      shipment_status_log[]
-  payments         payment[]
+  // Relations
+  shipments       shipments[]
+  reconciliations reconciliations[]
+
+  @@map("partners")
 }
 
-model shipment_status_log {
-  id           String          @id @default(uuid())
-  shipment_id  String
-  status       shipment_status
-  updated_at   DateTime        @default(now())
-  source       String
+model shipments {
+  id               String           @id @default(uuid()) @db.Uuid
+  customer_id      String?          @db.Uuid
+  sender_name      String?
+  sender_address   String?
+  receiver_name    String?
+  receiver_address String?
+  weight           Float?
+  length           Float?
+  width            Float?
+  height           Float?
+  description      String?
+  price            Int?
+  partner_id       String?          @db.Uuid
+  status           shipment_status  @default(created)
+  created_at       DateTime         @default(now()) @db.Timestamptz(6)
 
-  shipment     Shipment        @relation(fields: [shipment_id], references: [id])
+  // Relations
+  customer   users?          @relation("UserShipments", fields: [customer_id], references: [id])
+  partner    partners?       @relation(fields: [partner_id], references: [id])
+  payments   payments[]
+  logs       shipment_status_logs[]
+
+  @@map("shipments")
 }
 
-model partner {
-  id               String            @id @default(uuid())
-  name             String
-  api_url          String
-  api_key          String
-  active           Boolean           @default(true)
-  config           Json
+model shipment_status_logs {
+  id          String           @id @default(uuid()) @db.Uuid
+  shipment_id String           @db.Uuid
+  status      shipment_status
+  updated_at  DateTime         @default(now()) @db.Timestamptz(6)
+  source      String?
 
-  reconciliations  reconciliation[]
+  // Relation
+  shipment    shipments        @relation(fields: [shipment_id], references: [id])
+
+  @@map("shipment_status_logs")
 }
 
-model payment {
-  id           String         @id @default(uuid())
-  shipment_id  String
-  amount       Decimal
-  method       payment_method
-  status       payment_status @default(pending)
-  paid_at      DateTime?
+model payments {
+  id          String           @id @default(uuid()) @db.Uuid
+  shipment_id String?          @db.Uuid
+  amount      Decimal
+  method      payment_method
+  status      payment_status   @default(pending)
+  paid_at     DateTime?        @db.Timestamptz(6)
 
-  shipment     Shipment       @relation(fields: [shipment_id], references: [id])
+  // Relation
+  shipment    shipments?       @relation(fields: [shipment_id], references: [id])
+
+  @@map("payments")
 }
 
-model reconciliation {
-  id            String                @id @default(uuid())
-  partner_id    String
-  period_start  DateTime
-  period_end    DateTime
+model reconciliations {
+  id            String                @id @default(uuid()) @db.Uuid
+  partner_id    String                @db.Uuid
+  period_start  DateTime             @db.Timestamptz(6)
+  period_end    DateTime             @db.Timestamptz(6)
   total_amount  Decimal
   status        reconciliation_status @default(pending)
 
-  partner       partner               @relation(fields: [partner_id], references: [id])
+  // Relation
+  partner       partners              @relation(fields: [partner_id], references: [id])
+
+  @@map("reconciliations")
 }
 
-model notification {
-  id          String              @id @default(uuid())
-  user_id     String
-  content     String
-  method      notification_method
-  status      notification_status @default(sent)
-  created_at  DateTime            @default(now())
+model notifications {
+  id         String              @id @default(uuid()) @db.Uuid
+  user_id    String              @db.Uuid
+  content    String?
+  method     notification_method
+  status     notification_status @default(sent)
+  created_at DateTime            @default(now()) @db.Timestamptz(6)
 
-  user        user                @relation(fields: [user_id], references: [id])
+  // Relation
+  user       users               @relation(fields: [user_id], references: [id])
+
+  @@map("notifications")
 }
 
-model shipper_location {
-  id          String   @id @default(uuid())
-  shipper_id  String
-  latitude    Float
-  longitude   Float
-  updated_at  DateTime @default(now())
+model shipper_locations {
+  id         String   @id @default(uuid()) @db.Uuid
+  shipper_id String   @db.Uuid
+  latitude   Float
+  longitude  Float
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
 
-  shipper     user     @relation(fields: [shipper_id], references: [id])
+  // Relation
+  shipper    users    @relation(fields: [shipper_id], references: [id])
+
+  @@map("shipper_locations")
 }

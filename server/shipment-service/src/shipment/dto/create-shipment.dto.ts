@@ -30,16 +30,16 @@ export class CreateShipmentDto {
     height: number;
 
     @IsNotEmpty()
-    dimension: string;
-
-    @IsNotEmpty()
     senderPhone: string;
 
     @IsNotEmpty()
     receiverPhone: string;
 
+    @IsOptional()
+    description?: string;
+
     @IsNumber()
-    fee: number;
+    price: number;
 
     @IsOptional()
     @IsUUID()

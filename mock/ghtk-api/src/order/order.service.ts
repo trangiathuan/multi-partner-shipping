@@ -7,16 +7,30 @@ export class OrderService {
     constructor(private readonly sb: SupabaseService) { }
 
     async createOrder(data: any) {
-        const order_code = uuidv4();
+        // order_code là chuỗi 15 số ngẫu nhiên, đảm bảo không trùng
+        let order_code: string;
+        let isDuplicate = true;
+        let tryCount = 0;
+        do {
+            order_code = Array.from({ length: 15 }, () => Math.floor(Math.random() * 10)).join('');
+            const { data: existed } = await this.sb.getClient().from('orders').select('order_code').eq('order_code', order_code).single();
+            isDuplicate = !!existed;
+            tryCount++;
+        } while (isDuplicate && tryCount < 100);
+        // Nếu vẫn trùng sau 100 lần, thêm hậu tố thời gian để đảm bảo duy nhất
+        if (isDuplicate) {
+            order_code = order_code.slice(0, 10) + Date.now().toString().slice(-5);
+        }
         const newOrder = {
             order_code,
-            sender_name: data.sender.name,
-            sender_address: data.sender.address,
-            sender_phone: data.sender.phone,
-            receiver_name: data.receiver.name,
-            receiver_address: data.receiver.address,
-            receiver_phone: data.receiver.phone,
-            fee: data.fee,
+            sender_name: data.sender_name,
+            sender_address: data.sender_address,
+            sender_phone: data.sender_phone,
+            receiver_name: data.receiver_name,
+            receiver_address: data.receiver_address,
+            receiver_phone: data.receiver_phone,
+            description: data.description || '',
+            fee: data.price,
             status: 'created',
             created_at: new Date().toISOString(),
         };
