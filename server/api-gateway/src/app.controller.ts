@@ -14,10 +14,11 @@ export class AppController {
     async proxy(@Req() req: Request, @Res() res: Response) {
         // Mapping path -> service URL (dùng biến môi trường)
         const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL');
+        //const userServiceUrl = 'http://localhost:8001'
 
         const serviceMap = {
-            '/auth': 'http://localhost:8001', // Sử dụng biến môi trường nếu cần
-            '/user': 'http://localhost:8001',
+            '/auth': userServiceUrl, // Sử dụng biến môi trường nếu cần
+            '/user': userServiceUrl,
             '/shipment': 'http://localhost:4002',
             '/partner': 'http://localhost:4003',
             '/tracking': 'http://localhost:4004',

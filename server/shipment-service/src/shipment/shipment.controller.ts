@@ -7,8 +7,8 @@ import { CreateShipmentDto } from './dto/create-shipment.dto';
 export class ShipmentController {
     constructor(private shipmentService: ShipmentService) { }
 
-    @Post()
-    async createShipment(@Body() dto: CreateShipmentDto) {
-        return this.shipmentService.createShipment(dto);
+    @Post('createOrder')
+    async createShipment(@Body() body: CreateShipmentDto) {
+        return this.shipmentService.createShipment(body);
     }
 }

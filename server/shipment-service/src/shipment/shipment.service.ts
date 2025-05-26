@@ -27,7 +27,7 @@ export class ShipmentService {
         const result = await strategy.createOrder(dto);
 
         // Lưu vào DB shipment, gán status = 'created'
-        const shipmentRecord = await this.prisma.shipments.create({
+        const shipmentRecord = await this.prisma.shipment.create({
             data: {
                 customer_id: dto.customerId,
                 sender_name: dto.senderName,
