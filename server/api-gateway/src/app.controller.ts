@@ -12,14 +12,18 @@ export class AppController {
 
     @All('*') // Bắt tất cả phương thức và route dưới /api
     async proxy(@Req() req: Request, @Res() res: Response) {
-        // Mapping path -> service URL (dùng biến môi trường)
-        const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL');
-        //const userServiceUrl = 'http://localhost:8001'
+
+        // const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL');
+        // const shipmentServiceUrl = this.configService.get<string>('SHIPMENT_SERVICE_URL');
+
+        const userServiceUrl = 'http://localhost:8001'
+        const shipmentServiceUrl = 'http://localhost:8002'
+
 
         const serviceMap = {
             '/auth': userServiceUrl, // Sử dụng biến môi trường nếu cần
             '/user': userServiceUrl,
-            '/shipment': 'http://localhost:4002',
+            '/shipment': shipmentServiceUrl,
             '/partner': 'http://localhost:4003',
             '/tracking': 'http://localhost:4004',
             '/payment': 'http://localhost:4005',

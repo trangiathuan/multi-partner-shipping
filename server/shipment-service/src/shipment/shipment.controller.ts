@@ -4,7 +4,7 @@ import { ShipmentService } from './shipment.service';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { CalculateFreightDto } from './dto/calculate-freight.dto';
 
-@Controller('shipments')
+@Controller('shipment')
 export class ShipmentController {
     constructor(private shipmentService: ShipmentService) { }
 

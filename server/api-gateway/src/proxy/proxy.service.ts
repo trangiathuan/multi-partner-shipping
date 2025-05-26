@@ -10,6 +10,12 @@ export class ProxyService {
     async forwardRequest(serviceUrl: string, req: any): Promise<any> {
         const method = req.method.toLowerCase();
         const url = `${serviceUrl}${req.url.replace(/^\/api/, '')}`;
+        // Lấy ngày giờ Việt Nam (UTC+7)
+        const now = new Date();
+        const vnTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+        const vnTimeStr = vnTime.toISOString().replace('T', ' ').substring(0, 19);
+        console.log(`[${vnTimeStr}] [${method.toUpperCase()}] request to: ${url}`);
+
 
         // Clone và chỉnh sửa headers
         const headers = { ...req.headers };
@@ -58,6 +64,7 @@ export class ProxyService {
         });
 
         const response = await lastValueFrom(response$);
+
         return response.data;
     }
 }
