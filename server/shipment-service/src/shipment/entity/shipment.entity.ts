@@ -3,11 +3,16 @@ export class ShipmentEntity {
     customerId: string;
     senderName: string;
     senderAddress: string;
+    senderPhone: string;
     receiverName: string;
     receiverAddress: string;
+    receiverPhone?: string;
     weight: number;
-    dimension: any;
+    length: number;
+    width: number;
+    height: number;
     partnerId?: string;
+    orderCode?: string;
     status: string;
     createdAt: Date;
 
@@ -21,11 +26,16 @@ export class ShipmentEntity {
             customerId: record.customer_id,
             senderName: record.sender_name,
             senderAddress: record.sender_address,
+            senderPhone: record.sender_phone,
             receiverName: record.receiver_name,
             receiverAddress: record.receiver_address,
+            receiverPhone: record.receiver_phone,
             weight: record.weight,
-            dimension: record.dimension,
+            length: record.length,
+            width: record.width,
+            height: record.height,
             partnerId: record.partner_id,
+            orderCode: record.order_code,
             status: record.status,
             createdAt: record.created_at,
         });

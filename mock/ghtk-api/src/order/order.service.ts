@@ -12,7 +12,7 @@ export class OrderService {
         let isDuplicate = true;
         let tryCount = 0;
         do {
-            order_code = Array.from({ length: 15 }, () => Math.floor(Math.random() * 10)).join('');
+            order_code = 'GHTK' + Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join('');
             const { data: existed } = await this.sb.getClient().from('orders').select('order_code').eq('order_code', order_code).single();
             isDuplicate = !!existed;
             tryCount++;

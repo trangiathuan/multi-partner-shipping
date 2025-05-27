@@ -7,7 +7,119 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ENUMS
+model users {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email             String              @unique
+  password_hash     String
+  role              user_role           @default(customer)
+  full_name         String?
+  phone             String?
+  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  notifications     notifications[]
+  shipments         shipments[]         @relation("UserShipments")
+  shipper_locations shipper_locations[]
+
+  @@map("users")
+}
+
+model partners {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  api_url         String?
+  api_key         String?
+  active          Boolean           @default(true)
+  config          Json?
+  reconciliations reconciliations[]
+  shipments       shipments[]
+
+  @@map("partners")
+}
+
+model shipments {
+  id               String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customer_id      String?                @db.Uuid
+  sender_name      String?
+  sender_address   String?
+  receiver_name    String?
+  receiver_address String?
+  weight           Float?
+  length           Float?
+  width            Float?
+  height           Float?
+  partner_id       String?                @db.Uuid
+  status           shipment_status?       @default(created)
+  created_at       DateTime?              @default(now()) @db.Timestamptz(6)
+  description      String?
+  price            Int?
+  order_code       String?
+  sender_phone     String?
+  receiver_phone   String?
+  payments         payments[]
+  logs             shipment_status_logs[]
+  customer         users?                 @relation("UserShipments", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  partner          partners?              @relation(fields: [partner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("shipments")
+}
+
+model shipment_status_logs {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shipment_id String?         @db.Uuid
+  status      shipment_status
+  updated_at  DateTime?       @default(now()) @db.Timestamptz(6)
+  source      String?
+  shipment    shipments?      @relation(fields: [shipment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("shipment_status_logs")
+}
+
+model payments {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shipment_id String?         @db.Uuid
+  amount      Decimal         @db.Decimal
+  method      payment_method
+  status      payment_status? @default(pending)
+  paid_at     DateTime?       @db.Timestamptz(6)
+  shipment    shipments?      @relation(fields: [shipment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("payments")
+}
+
+model reconciliations {
+  id           String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partner_id   String?                @db.Uuid
+  period_start DateTime               @db.Timestamptz(6)
+  period_end   DateTime               @db.Timestamptz(6)
+  total_amount Decimal                @db.Decimal
+  status       reconciliation_status? @default(pending)
+  partner      partners?              @relation(fields: [partner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("reconciliations")
+}
+
+model notifications {
+  id         String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?              @db.Uuid
+  content    String?
+  method     notification_method
+  status     notification_status? @default(sent)
+  created_at DateTime?            @default(now()) @db.Timestamptz(6)
+  user       users?               @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("notifications")
+}
+
+model shipper_locations {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shipper_id String?   @db.Uuid
+  latitude   Float
+  longitude  Float
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  shipper    users?    @relation(fields: [shipper_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("shipper_locations")
+}
+
 enum user_role {
   customer
   shipper
@@ -48,132 +160,4 @@ enum notification_method {
 enum notification_status {
   sent
   failed
-}
-
-// MODELS
-
-model users {
-  id             String              @id @default(uuid()) @db.Uuid
-  email          String              @unique
-  password_hash  String
-  role           user_role           @default(customer)
-  full_name      String?
-  phone          String?
-  created_at     DateTime            @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  shipments          shipments[]            @relation("UserShipments")
-  notifications      notifications[]
-  shipper_locations  shipper_locations[]
-
-  @@map("users")
-}
-
-model partners {
-  id        String            @id @default(uuid()) @db.Uuid
-  name      String
-  api_url   String?
-  api_key   String?
-  active    Boolean           @default(true)
-  config    Json?
-
-  // Relations
-  shipments       shipments[]
-  reconciliations reconciliations[]
-
-  @@map("partners")
-}
-
-model shipments {
-  id               String           @id @default(uuid()) @db.Uuid
-  customer_id      String?          @db.Uuid
-  sender_name      String?
-  sender_address   String?
-  receiver_name    String?
-  receiver_address String?
-  weight           Float?
-  length           Float?
-  width            Float?
-  height           Float?
-  description      String?
-  price            Int?
-  partner_id       String?          @db.Uuid
-  status           shipment_status  @default(created)
-  created_at       DateTime         @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  customer   users?          @relation("UserShipments", fields: [customer_id], references: [id])
-  partner    partners?       @relation(fields: [partner_id], references: [id])
-  payments   payments[]
-  logs       shipment_status_logs[]
-
-  @@map("shipments")
-}
-
-model shipment_status_logs {
-  id          String           @id @default(uuid()) @db.Uuid
-  shipment_id String           @db.Uuid
-  status      shipment_status
-  updated_at  DateTime         @default(now()) @db.Timestamptz(6)
-  source      String?
-
-  // Relation
-  shipment    shipments        @relation(fields: [shipment_id], references: [id])
-
-  @@map("shipment_status_logs")
-}
-
-model payments {
-  id          String           @id @default(uuid()) @db.Uuid
-  shipment_id String?          @db.Uuid
-  amount      Decimal
-  method      payment_method
-  status      payment_status   @default(pending)
-  paid_at     DateTime?        @db.Timestamptz(6)
-
-  // Relation
-  shipment    shipments?       @relation(fields: [shipment_id], references: [id])
-
-  @@map("payments")
-}
-
-model reconciliations {
-  id            String                @id @default(uuid()) @db.Uuid
-  partner_id    String                @db.Uuid
-  period_start  DateTime             @db.Timestamptz(6)
-  period_end    DateTime             @db.Timestamptz(6)
-  total_amount  Decimal
-  status        reconciliation_status @default(pending)
-
-  // Relation
-  partner       partners              @relation(fields: [partner_id], references: [id])
-
-  @@map("reconciliations")
-}
-
-model notifications {
-  id         String              @id @default(uuid()) @db.Uuid
-  user_id    String              @db.Uuid
-  content    String?
-  method     notification_method
-  status     notification_status @default(sent)
-  created_at DateTime            @default(now()) @db.Timestamptz(6)
-
-  // Relation
-  user       users               @relation(fields: [user_id], references: [id])
-
-  @@map("notifications")
-}
-
-model shipper_locations {
-  id         String   @id @default(uuid()) @db.Uuid
-  shipper_id String   @db.Uuid
-  latitude   Float
-  longitude  Float
-  updated_at DateTime @default(now()) @db.Timestamptz(6)
-
-  // Relation
-  shipper    users    @relation(fields: [shipper_id], references: [id])
-
-  @@map("shipper_locations")
 }

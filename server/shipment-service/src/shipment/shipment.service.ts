@@ -6,6 +6,7 @@ import { ShipmentStrategy } from './strategy/shipment.strategy.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { ShipmentEntity } from './entity/shipment.entity';
 import { CalculateFreightDto } from './dto/calculate-freight.dto';
+import { GetOrderDto } from './dto/get-order-.dto';
 
 @Injectable()
 export class ShipmentService {
@@ -27,6 +28,7 @@ export class ShipmentService {
         }
 
         const result = await strategy.createOrder(dto);
+        console.log('Result from strategy createOrder:', result);
 
         // Kiểm tra partnerId hợp lệ nếu có
         let validPartnerId: string | null = null;
@@ -40,7 +42,6 @@ export class ShipmentService {
                 throw new BadRequestException('partnerId không tồn tại');
             }
             validPartnerId = partner.id;
-            console.log('Valid partnerId:', validPartnerId);
         }
 
         // Kiểm tra customerId hợp lệ
@@ -57,13 +58,16 @@ export class ShipmentService {
                 customer_id: dto.customerId,
                 sender_name: dto.senderName,
                 sender_address: dto.senderAddress,
+                sender_phone: dto.senderPhone,
                 receiver_name: dto.receiverName,
                 receiver_address: dto.receiverAddress,
+                receiver_phone: dto.receiverPhone,
                 weight: Number(dto.weight),
                 width: Number(dto.width),
                 length: Number(dto.length),
                 height: Number(dto.height),
                 partner_id: validPartnerId,
+                order_code: result.order_code,
                 price: Number(dto.price),
                 description: dto.description || '',
                 status: 'created',
@@ -86,6 +90,23 @@ export class ShipmentService {
         return {
             message: 'Freight calculated successfully',
             freight: result.fee
+        }
+    }
+
+    async getListOrders(dto: GetOrderDto) {
+        const shipments = await this.prisma.shipments.findMany({
+            where: { customer_id: dto.customer_id },
+            include: {
+                partner: {
+                    select: {
+                        name: true,
+                    }
+                }
+            },
+        });
+        return {
+            message: 'List of orders retrieved successfully',
+            shipments
         }
     }
 }

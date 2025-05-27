@@ -3,6 +3,7 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { ShipmentService } from './shipment.service';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { CalculateFreightDto } from './dto/calculate-freight.dto';
+import { GetOrderDto } from './dto/get-order-.dto';
 
 @Controller('shipment')
 export class ShipmentController {
@@ -16,5 +17,10 @@ export class ShipmentController {
     @Post('calculateFreight')
     async calculateFreight(@Body() body: CalculateFreightDto) {
         return this.shipmentService.calculateFreight(body);
+    }
+
+    @Post('getListOrders')
+    async getListOrders(@Body() body: GetOrderDto) {
+        return this.shipmentService.getListOrders(body);
     }
 }
