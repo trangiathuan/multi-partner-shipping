@@ -5,7 +5,7 @@ import { CalculateFeeDto } from './dto/calculate-fee.dto';
 
 @ApiTags('Shipping')
 @ApiSecurity('x-api-key')
-@Controller('ghtk/shipping')
+@Controller('viettelpost/shipping')
 export class ShippingController {
     constructor(private readonly shippingService: ShippingService) { }
 

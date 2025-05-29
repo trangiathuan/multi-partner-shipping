@@ -7,7 +7,7 @@ import { CalculateFreightDto } from '../dto/calculate-freight.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class GHTKStrategy implements ShipmentStrategy {
+export class VIETTELPOSTStrategy implements ShipmentStrategy {
     constructor(
         private httpService: HttpService,
         private prisma: PrismaService
@@ -19,13 +19,13 @@ export class GHTKStrategy implements ShipmentStrategy {
             where: { id: dto.partnerId },
         });
         return API_KEY?.api_key || ''
+        //this.API_KEY = API_Key 
     }
     async createOrder(dto: CreateShipmentDto): Promise<any> {
         const API_KEY = await this.getAPIKey(dto);
 
-        const url = process.env.GHTK_CREATE_ORDER_API || '';
+        const url = process.env.VIETTELPOST_CREATE_ORDER_API || '';
         // Tạo order_code là chuỗi 15 số ngẫu nhiên
-        //const order_code = Array.from({ length: 15 }, () => Math.floor(Math.random() * 10)).join('');
         const payload = {
             sender_name: dto.senderName,
             sender_address: dto.senderAddress,
@@ -48,14 +48,14 @@ export class GHTKStrategy implements ShipmentStrategy {
             });
             return res.data;
         } catch (error) {
-            console.error('GHTK API error:', error?.response?.data || error.message || error);
+            console.error('VIETTEL POST API error:', error?.response?.data || error.message || error);
             throw error;
         }
     }
     async calculateFreight(dto: CalculateFreightDto): Promise<any> {
         const API_KEY = await this.getAPIKey(dto);
 
-        const url = process.env.GHTK_CAL_FEE_API || '';
+        const url = process.env.VIETTELPOST_CAL_FEE_API || '';
         const payload = {
             sender_province: dto.sender_province,
             sender_address: dto.sender_address,

@@ -5,7 +5,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatusDto } from './dto/order-status.dto';
 
 @ApiTags('Order')
-@Controller('ghtk/order')
+@Controller('viettelpost/order')
 export class OrderController {
     constructor(private readonly orderService: OrderService) { }
 

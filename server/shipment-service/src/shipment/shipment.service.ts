@@ -1,35 +1,36 @@
 // shipment/shipment.service.ts
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
-import { GHTKStrategy } from './strategy/ghtk.strategy';
+import { GHTKStrategy } from './strategy/GHTK.strategy';
 import { ShipmentStrategy } from './strategy/shipment.strategy.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { ShipmentEntity } from './entity/shipment.entity';
 import { CalculateFreightDto } from './dto/calculate-freight.dto';
 import { GetOrderDto } from './dto/get-order-.dto';
+import { VIETTELPOSTStrategy } from './strategy/VIETTELPOST.stratery';
 
 @Injectable()
 export class ShipmentService {
     private strategies: Record<string, ShipmentStrategy>;
 
     constructor(
-        private readonly ghtk: GHTKStrategy,
+        private readonly GHTK: GHTKStrategy,
+        private readonly VIETTELPOST: VIETTELPOSTStrategy,
         private readonly prisma: PrismaService
     ) {
         this.strategies = {
-            '5d5245fe-900e-4680-8705-62b6e334e2c2': this.ghtk,
+            '5d5245fe-900e-4680-8705-62b6e334e2c2': this.GHTK,
+            '81d6b3f2-1761-4ba5-afde-a6c66346f82e': this.VIETTELPOST,
         };
     }
 
     async createShipment(dto: CreateShipmentDto) {
-        const strategy = dto.partnerId ? this.strategies[dto.partnerId] : this.ghtk;
+        const strategy = dto.partnerId ? this.strategies[dto.partnerId] : this.GHTK;
         if (!strategy || typeof strategy.createOrder !== 'function') {
             throw new BadRequestException('Invalid or unsupported partnerId: ' + dto.partnerId);
         }
 
         const result = await strategy.createOrder(dto);
-        console.log('Result from strategy createOrder:', result);
-
         // Kiểm tra partnerId hợp lệ nếu có
         let validPartnerId: string | null = null;
         if (dto.partnerId) {
@@ -85,7 +86,7 @@ export class ShipmentService {
     }
 
     async calculateFreight(dto: CalculateFreightDto) {
-        const strategy = dto.partnerId ? this.strategies[dto.partnerId] : this.ghtk;
+        const strategy = dto.partnerId ? this.strategies[dto.partnerId] : this.GHTK;
         const result = await strategy.calculateFreight(dto);
         return {
             message: 'Freight calculated successfully',
@@ -94,19 +95,23 @@ export class ShipmentService {
     }
 
     async getListOrders(dto: GetOrderDto) {
-        const shipments = await this.prisma.shipments.findMany({
-            where: { customer_id: dto.customer_id },
-            include: {
-                partner: {
-                    select: {
-                        name: true,
+        return await this.prisma.$transaction(async (prisma) => {
+            const shipments = await this.prisma.shipments.findMany({
+                where: { customer_id: dto.customer_id },
+                include: {
+                    partner: {
+                        select: {
+                            name: true,
+                        }
                     }
-                }
-            },
-        });
-        return {
-            message: 'List of orders retrieved successfully',
-            shipments
-        }
+                },
+            });
+            const total = await shipments.length;
+            return {
+                message: 'List of orders retrieved successfully',
+                total,
+                shipments
+            }
+        })
     }
 }
