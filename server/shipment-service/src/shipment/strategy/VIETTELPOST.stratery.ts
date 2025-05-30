@@ -5,6 +5,7 @@ import { ShipmentStrategy } from './shipment.strategy.interface';
 import { CreateShipmentDto } from '../dto/create-shipment.dto';
 import { CalculateFreightDto } from '../dto/calculate-freight.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { GetStatusDto } from '../dto/get-status.dto';
 
 @Injectable()
 export class VIETTELPOSTStrategy implements ShipmentStrategy {
@@ -14,15 +15,14 @@ export class VIETTELPOSTStrategy implements ShipmentStrategy {
     ) { }
 
 
-    async getAPIKey(dto): Promise<any> {
+    async getAPIKey(partnerId): Promise<any> {
         const API_KEY = await this.prisma.partners.findFirst({
-            where: { id: dto.partnerId },
+            where: { id: partnerId },
         });
         return API_KEY?.api_key || ''
-        //this.API_KEY = API_Key 
     }
     async createOrder(dto: CreateShipmentDto): Promise<any> {
-        const API_KEY = await this.getAPIKey(dto);
+        const API_KEY = await this.getAPIKey(dto.partnerId);
 
         const url = process.env.VIETTELPOST_CREATE_ORDER_API || '';
         // Tạo order_code là chuỗi 15 số ngẫu nhiên
@@ -53,7 +53,7 @@ export class VIETTELPOSTStrategy implements ShipmentStrategy {
         }
     }
     async calculateFreight(dto: CalculateFreightDto): Promise<any> {
-        const API_KEY = await this.getAPIKey(dto);
+        const API_KEY = await this.getAPIKey(dto.partnerId);
 
         const url = process.env.VIETTELPOST_CAL_FEE_API || '';
         const payload = {
@@ -79,4 +79,27 @@ export class VIETTELPOSTStrategy implements ShipmentStrategy {
             console.log('GHTK API error:', error?.response?.data || error.message || error);
         }
     }
+
+    async getStatus(dto: GetStatusDto): Promise<any> {
+        const API_KEY = await this.getAPIKey(dto.partner_id);
+        const order_code = dto.order_code;
+
+        const url = process.env.VIETTELPOST_GET_STATUS_API + `${order_code}` || '';
+
+        const res = await this.httpService.axiosRef.get(url, {
+            headers: { 'x-api-key': API_KEY },
+        })
+
+        const status = res.data.order.status || 'unknown';
+
+        switch (status) {
+            case 'created': return 'created';
+            case 'accepted': return 'accepted';
+            case 'shipping': return 'shipping';
+            case 'delivered': return 'delivered';
+            case 'failed': return 'failed';
+            default: return 'unknown';
+        }
+    }
+
 }
