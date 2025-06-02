@@ -90,7 +90,12 @@ export class VIETTELPOSTStrategy implements ShipmentStrategy {
             headers: { 'x-api-key': API_KEY },
         })
 
-        const status = res.data.order.status || 'unknown';
+        let status = 'unknown';
+        if (!res.data || !res.data.order) {
+            status = 'unknown';
+        } else {
+            status = res.data.order.status;
+        }
 
         switch (status) {
             case 'created': return 'created';

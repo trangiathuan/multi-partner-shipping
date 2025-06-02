@@ -3,6 +3,7 @@ import { OrderService } from './order.service';
 import { ApiTags, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatusDto } from './dto/order-status.dto';
+import { OrderTrackingDto } from './dto/order-tracking.dto';
 
 @ApiTags('Order')
 @Controller('viettelpost/order')
@@ -35,5 +36,19 @@ export class OrderController {
     @ApiResponse({ status: 200, description: 'Lấy trạng thái đơn hàng.' })
     async getOrderStatus(@Body() body: OrderStatusDto) {
         return this.orderService.getOrderStatus(body.order_code);
+    }
+
+    @Post('tracking')
+    @ApiBody({ schema: { example: { order_code: '' } } })
+    @ApiResponse({ status: 200, description: 'Thêm theo dõi đơn hàng' })
+    async orderTracking(@Body() body: OrderTrackingDto) {
+        return this.orderService.orderTracking(body);
+    }
+
+    @Post('get-order-tracking')
+    @ApiBody({ schema: { example: { order_code: 'abc-123-xyz' } } })
+    @ApiResponse({ status: 200, description: 'Lấy trạng thái đơn hàng.' })
+    async getOrderTracking(@Body() body: OrderTrackingDto) {
+        return this.orderService.getOrderTracking(body);
     }
 }

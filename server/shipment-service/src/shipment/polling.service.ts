@@ -4,6 +4,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { ShipmentStrategyFactory } from "./strategy/shipment.streategy.factory";
 import { GetStatusDto } from "./dto/get-status.dto";
 import { shipment_status } from "@prisma/client";
+import { get } from "http";
 
 @Injectable()
 export class PollingService {
@@ -11,13 +12,12 @@ export class PollingService {
         private prisma: PrismaService,
         private factory: ShipmentStrategyFactory
     ) {
-        nodeCron.schedule('*/2 * * * * * ', async () => {
+        nodeCron.schedule('*/10 * * * * *', async () => {
             this.pollingShipments();
         })
     }
     async pollingShipments() {
-        console.log('Bắt đầu polling trạng thái đơn hàng');
-
+        console.log(`[${new Date().toLocaleString()}] Bắt đầu polling trạng thái đơn hàng`);
         const orders = await this.getPendingShipments();
         for (const order of orders) {
             if (order.partner_id === null) {
@@ -30,14 +30,13 @@ export class PollingService {
                 order_code: order.order_code,
             } as GetStatusDto);
 
-            if (status !== order.status) {
+            if (status !== order.status && status !== 'unknown') {
                 console.log('có thay đổi trạng thái của đơn hàng', order.order_code, 'Status:', status);
                 await this.updateStatus(order.id, status);
             }
         }
 
     }
-
 
     async getPendingShipments() {
         const res = await this.prisma.shipments.findMany({
