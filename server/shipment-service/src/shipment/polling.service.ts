@@ -5,14 +5,18 @@ import { ShipmentStrategyFactory } from "./strategy/shipment.streategy.factory";
 import { GetStatusDto } from "./dto/get-status.dto";
 import { shipment_status } from "@prisma/client";
 import { get } from "http";
+import { ShipmentService } from "./shipment.service";
+import { MailService } from "src/mail/mail.service";
 
 @Injectable()
 export class PollingService {
     constructor(
         private prisma: PrismaService,
-        private factory: ShipmentStrategyFactory
+        private factory: ShipmentStrategyFactory,
+        private shipmentService: ShipmentService,
+        private mailService: MailService
     ) {
-        nodeCron.schedule('*/10 * * * * *', async () => {
+        nodeCron.schedule('*/5 * * * * *', async () => {
             this.pollingShipments();
         })
     }
@@ -31,11 +35,25 @@ export class PollingService {
             } as GetStatusDto);
 
             if (status !== order.status && status !== 'unknown') {
+                if (!order.customer_id) {
+                    throw new BadRequestException('customer_id không được null');
+                }
+                const user = await this.prisma.users.findUnique({
+                    where: { id: order.customer_id },
+                    select: { email: true, full_name: true }
+                })
+                if (!user) {
+                    throw new BadRequestException('Không tìm thấy user với customer_id: ' + order.customer_id);
+                }
+                if (!order.order_code) {
+                    throw new BadRequestException('order_code không được null');
+                }
+
                 console.log('có thay đổi trạng thái của đơn hàng', order.order_code, 'Status:', status);
-                await this.updateStatus(order.id, status);
+                await this.shipmentService.updateStatus(order.id, status);
+                await this.mailService.sendEmailUpdateStatus(user.email, status, order.order_code);
             }
         }
-
     }
 
     async getPendingShipments() {
@@ -47,6 +65,7 @@ export class PollingService {
             },
             select: {
                 id: true,
+                customer_id: true,
                 partner_id: true,
                 order_code: true,
                 status: true,
@@ -55,22 +74,6 @@ export class PollingService {
         return res;
     }
 
-    async updateStatus(id: string, status: string) {
-        if (!id || !status) {
-            throw new BadRequestException('id và status không được để trống');
-        }
-        if (!Object.values(shipment_status).includes(status as shipment_status)) {
-            throw new BadRequestException(`Status không hợp lệ: ${status}`);
-        }
-        const res = await this.prisma.shipments.update({
-            where: {
-                id: id
-            },
-            data: {
-                status: status as shipment_status
-            }
-        });
-        return { message: 'Cập nhật trạng thái thành công', shipment: res };
-    }
+
 
 }

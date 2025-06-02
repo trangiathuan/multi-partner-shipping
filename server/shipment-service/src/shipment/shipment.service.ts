@@ -8,6 +8,8 @@ import { ShipmentEntity } from './entity/shipment.entity';
 import { CalculateFreightDto } from './dto/calculate-freight.dto';
 import { GetOrderDto } from './dto/get-order-.dto';
 import { VIETTELPOSTStrategy } from './strategy/VIETTELPOST.stratery';
+import { shipment_status } from '@prisma/client';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class ShipmentService {
@@ -16,7 +18,8 @@ export class ShipmentService {
     constructor(
         private readonly GHTK: GHTKStrategy,
         private readonly VIETTELPOST: VIETTELPOSTStrategy,
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly mailService: MailService, // Giả sử bạn đã tạo MailService để gửi email
     ) {
         this.strategies = {
             '5d5245fe-900e-4680-8705-62b6e334e2c2': this.GHTK,
@@ -75,6 +78,8 @@ export class ShipmentService {
             },
         });
 
+        await this.mailService.sendEmailUpdateStatus(user.email, 'created', result.order_code);
+
         // Chuyển đổi record DB sang entity rõ ràng
         const shipment = ShipmentEntity.fromDb(shipmentRecord);
 
@@ -114,5 +119,25 @@ export class ShipmentService {
             }
         })
     }
+
+    async updateStatus(id: string, status: string) {
+        if (!id || !status) {
+            throw new BadRequestException('id và status không được để trống');
+        }
+        if (!Object.values(shipment_status).includes(status as shipment_status)) {
+            throw new BadRequestException(`Status không hợp lệ: ${status}`);
+        }
+        const res = await this.prisma.shipments.update({
+            where: {
+                id: id
+            },
+            data: {
+                status: status as shipment_status
+            }
+        });
+        return { message: 'Cập nhật trạng thái thành công', shipment: res };
+    }
+
+
 
 }

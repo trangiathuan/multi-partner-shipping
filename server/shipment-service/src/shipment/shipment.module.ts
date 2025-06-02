@@ -7,9 +7,10 @@ import { HttpModule } from '@nestjs/axios';
 import { VIETTELPOSTStrategy } from './strategy/VIETTELPOST.stratery';
 import { ShipmentStrategyFactory } from './strategy/shipment.streategy.factory';
 import { PollingService } from './polling.service';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule, MailModule],
   controllers: [ShipmentController],
   providers: [ShipmentService, PollingService, GHTKStrategy, VIETTELPOSTStrategy, ShipmentStrategyFactory],
   exports: [ShipmentStrategyFactory]
