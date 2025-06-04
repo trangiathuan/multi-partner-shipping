@@ -3,8 +3,6 @@ import nodeCron from "node-cron";
 import { PrismaService } from "src/prisma/prisma.service";
 import { ShipmentStrategyFactory } from "./strategy/shipment.streategy.factory";
 import { GetStatusDto } from "./dto/get-status.dto";
-import { shipment_status } from "@prisma/client";
-import { get } from "http";
 import { ShipmentService } from "./shipment.service";
 import { MailService } from "src/mail/mail.service";
 
@@ -16,7 +14,7 @@ export class PollingService {
         private shipmentService: ShipmentService,
         private mailService: MailService
     ) {
-        nodeCron.schedule('*/5 * * * * *', async () => {
+        nodeCron.schedule('*/2 * * * *', async () => {
             this.pollingShipments();
         })
     }
