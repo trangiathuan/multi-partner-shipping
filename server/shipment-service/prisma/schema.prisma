@@ -54,6 +54,8 @@ model shipments {
   order_code       String?
   sender_phone     String?
   receiver_phone   String?
+  payment_method   String?
+  payment_status   payment_status?        @default(pending)
   payments         payments[]
   logs             shipment_status_logs[]
   customer         users?                 @relation("UserShipments", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -144,7 +146,7 @@ enum payment_method {
 enum payment_status {
   pending
   paid
-  refunded
+  faild
 }
 
 enum reconciliation_status {

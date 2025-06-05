@@ -37,8 +37,10 @@ export class ShipmentService {
         if (!dto.partnerId) {
             throw new Error('Không có partner_id')
         }
-        const strategy = this.strategyFactory.getStrategy(dto.partnerId)
-        const result = await strategy.createOrder(dto);
+
+        // const strategy = this.strategyFactory.getStrategy(dto.partnerId)
+        // const result = await strategy.createOrder(dto);
+
         // Kiểm tra partnerId hợp lệ nếu có
         let validPartnerId: string | null = null;
         if (dto.partnerId) {
@@ -76,19 +78,21 @@ export class ShipmentService {
                 length: Number(dto.length),
                 height: Number(dto.height),
                 partner_id: validPartnerId,
-                order_code: result.order_code,
+                order_code: '',
                 price: Number(dto.price),
                 description: dto.description || '',
                 status: 'created',
+                payment_method: dto.payment_method
             },
         });
 
-        await this.mailService.sendEmailUpdateStatus(user.email, 'created', result.order_code);
+        //await this.mailService.sendEmailUpdateStatus(user.email, 'created', result.order_code);
+        const payment = await this.paymentService.createPayment({ orderId: shipmentRecord.id, method: dto.payment_method, amount: dto.price } as CreatePaymentDTO)
 
         return {
             message: 'Shipment created successfully',
-            tracking: result.order?.label,
             shipmentRecord,
+            payment
         };
     }
 

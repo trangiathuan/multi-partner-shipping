@@ -8,9 +8,7 @@ export class Momo implements PaymentsInterface {
     constructor(private axios: HttpService) { }
 
     async createPayment(dto: CreatePaymentDTO) {
-        console.log(dto);
-
-
+        const urltest = 'https://retained-documented-conventional-justin.trycloudflare.com'
         //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
         //parameters
         var accessKey = 'F8BBA842ECF85';
@@ -18,10 +16,10 @@ export class Momo implements PaymentsInterface {
         var orderInfo = 'pay with MoMo';
         var partnerCode = 'MOMO';
         var redirectUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
-        var ipnUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
+        var ipnUrl = `${urltest}/payment/callback`;
         var requestType = "payWithMethod";
         var amount = dto.amount;
-        var orderId = partnerCode + new Date().getTime();
+        var orderId = dto.orderId;
         var requestId = orderId;
         var extraData = '';
         var orderGroupId = '';

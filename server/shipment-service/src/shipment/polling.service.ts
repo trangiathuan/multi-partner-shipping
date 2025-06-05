@@ -14,13 +14,14 @@ export class PollingService {
         private shipmentService: ShipmentService,
         private mailService: MailService
     ) {
-        nodeCron.schedule('*/2 * * * *', async () => {
+        nodeCron.schedule('*/2 * * * * ', async () => {
             this.pollingShipments();
         })
     }
     async pollingShipments() {
         console.log(`[${new Date().toLocaleString()}] Bắt đầu polling trạng thái đơn hàng`);
         const orders = await this.getPendingShipments();
+
         for (const order of orders) {
             if (order.partner_id === null) {
                 throw new BadRequestException('partner_id không được null');
@@ -59,8 +60,21 @@ export class PollingService {
             where: {
                 status: {
                     in: ['created', 'accepted', 'shipping']
-                }
+                },
+                AND: [
+                    {
+                        order_code: {
+                            not: '',
+                        },
+                    },
+                    {
+                        order_code: {
+                            not: null,
+                        },
+                    },
+                ],
             },
+
             select: {
                 id: true,
                 customer_id: true,
