@@ -1,5 +1,5 @@
 // shipment/dto/create-shipment.dto.ts
-import { IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateShipmentDto {
     @IsNotEmpty()
@@ -40,6 +40,9 @@ export class CreateShipmentDto {
 
     @IsNumber()
     price: number;
+
+    @IsString()
+    payment_method: string;
 
     @IsOptional()
     @IsUUID()

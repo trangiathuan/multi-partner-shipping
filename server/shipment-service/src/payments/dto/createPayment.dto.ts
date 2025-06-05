@@ -7,5 +7,5 @@ export class CreatePaymentDTO {
 
     @IsNotEmpty()
     @IsNumber()
-    amount: string
+    amount: number
 }

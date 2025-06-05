@@ -10,6 +10,9 @@ import { GetOrderDto } from './dto/get-order-.dto';
 import { VIETTELPOSTStrategy } from './strategy/VIETTELPOST.stratery';
 import { shipment_status } from '@prisma/client';
 import { MailService } from 'src/mail/mail.service';
+import { ShipmentStrategyFactory } from './strategy/shipment.streategy.factory';
+import { PaymentService } from 'src/payments/payment.service';
+import { CreatePaymentDTO } from 'src/payments/dto/createPayment.dto';
 
 @Injectable()
 export class ShipmentService {
@@ -19,7 +22,9 @@ export class ShipmentService {
         private readonly GHTK: GHTKStrategy,
         private readonly VIETTELPOST: VIETTELPOSTStrategy,
         private readonly prisma: PrismaService,
-        private readonly mailService: MailService, // Giả sử bạn đã tạo MailService để gửi email
+        private readonly mailService: MailService,
+        private readonly strategyFactory: ShipmentStrategyFactory,
+        private readonly paymentService: PaymentService
     ) {
         this.strategies = {
             '5d5245fe-900e-4680-8705-62b6e334e2c2': this.GHTK,
@@ -28,11 +33,11 @@ export class ShipmentService {
     }
 
     async createShipment(dto: CreateShipmentDto) {
-        const strategy = dto.partnerId ? this.strategies[dto.partnerId] : this.GHTK;
-        if (!strategy || typeof strategy.createOrder !== 'function') {
-            throw new BadRequestException('Invalid or unsupported partnerId: ' + dto.partnerId);
-        }
 
+        if (!dto.partnerId) {
+            throw new Error('Không có partner_id')
+        }
+        const strategy = this.strategyFactory.getStrategy(dto.partnerId)
         const result = await strategy.createOrder(dto);
         // Kiểm tra partnerId hợp lệ nếu có
         let validPartnerId: string | null = null;
@@ -80,18 +85,18 @@ export class ShipmentService {
 
         await this.mailService.sendEmailUpdateStatus(user.email, 'created', result.order_code);
 
-        // Chuyển đổi record DB sang entity rõ ràng
-        const shipment = ShipmentEntity.fromDb(shipmentRecord);
-
         return {
             message: 'Shipment created successfully',
             tracking: result.order?.label,
-            shipment,
+            shipmentRecord,
         };
     }
 
     async calculateFreight(dto: CalculateFreightDto) {
-        const strategy = dto.partnerId ? this.strategies[dto.partnerId] : this.GHTK;
+        if (!dto.partnerId) {
+            throw new Error('Không có partner_id')
+        }
+        const strategy = this.strategyFactory.getStrategy(dto.partnerId)
         const result = await strategy.calculateFreight(dto);
         return {
             message: 'Freight calculated successfully',
@@ -100,24 +105,24 @@ export class ShipmentService {
     }
 
     async getListOrders(dto: GetOrderDto) {
-        return await this.prisma.$transaction(async (prisma) => {
-            const shipments = await this.prisma.shipments.findMany({
-                where: { customer_id: dto.customer_id },
-                include: {
-                    partner: {
-                        select: {
-                            name: true,
-                        }
+
+        const shipments = await this.prisma.shipments.findMany({
+            where: { customer_id: dto.customer_id },
+            include: {
+                partner: {
+                    select: {
+                        name: true,
                     }
-                },
-            });
-            const total = await shipments.length;
-            return {
-                message: 'List of orders retrieved successfully',
-                total,
-                shipments
-            }
-        })
+                }
+            },
+        });
+        const total = await shipments.length;
+        return {
+            message: 'List of orders retrieved successfully',
+            total,
+            shipments
+        }
+
     }
 
     async updateStatus(id: string, status: string) {

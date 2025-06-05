@@ -8,11 +8,13 @@ import { VIETTELPOSTStrategy } from './strategy/VIETTELPOST.stratery';
 import { ShipmentStrategyFactory } from './strategy/shipment.streategy.factory';
 import { PollingService } from './polling.service';
 import { MailModule } from 'src/mail/mail.module';
+import { PaymentService } from 'src/payments/payment.service';
+import { PaymentModule } from 'src/payments/payment.module';
 
 @Module({
-  imports: [HttpModule, MailModule],
+  imports: [HttpModule, MailModule, PaymentModule],
   controllers: [ShipmentController],
-  providers: [ShipmentService, PollingService, GHTKStrategy, VIETTELPOSTStrategy, ShipmentStrategyFactory],
+  providers: [ShipmentService, PollingService, GHTKStrategy, VIETTELPOSTStrategy, ShipmentStrategyFactory, PaymentService],
   exports: [ShipmentStrategyFactory]
 })
 export class ShipmentModule { }
