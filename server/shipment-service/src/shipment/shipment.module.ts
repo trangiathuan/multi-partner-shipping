@@ -10,11 +10,14 @@ import { PollingService } from './polling.service';
 import { MailModule } from 'src/mail/mail.module';
 import { PaymentService } from 'src/payments/payment.service';
 import { PaymentModule } from 'src/payments/payment.module';
+import { ShipmentConsumer } from './shipment.consumer';
+import { RabbitMQModule } from 'src/rabbitmq/rabbitmq.module';
 
 @Module({
-  imports: [HttpModule, MailModule, PaymentModule],
-  controllers: [ShipmentController],
-  providers: [ShipmentService, PollingService, GHTKStrategy, VIETTELPOSTStrategy, ShipmentStrategyFactory, PaymentService],
+  imports: [HttpModule, MailModule, PaymentModule, RabbitMQModule],
+  controllers: [ShipmentController, ShipmentConsumer],
+  providers: [ShipmentService, PollingService, GHTKStrategy, VIETTELPOSTStrategy,
+    ShipmentStrategyFactory, PaymentService,],
   exports: [ShipmentStrategyFactory]
 })
 export class ShipmentModule { }

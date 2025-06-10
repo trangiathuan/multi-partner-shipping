@@ -8,7 +8,7 @@ export class Momo implements PaymentsInterface {
     constructor(private axios: HttpService) { }
 
     async createPayment(dto: CreatePaymentDTO) {
-        const urltest = 'https://retained-documented-conventional-justin.trycloudflare.com'
+        const urltest = 'https://fits-attended-chips-pts.trycloudflare.com'
         //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
         //parameters
         var accessKey = 'F8BBA842ECF85';

@@ -11,12 +11,14 @@ import { ShipmentStrategyFactory } from 'src/shipment/strategy/shipment.streateg
 import { MailService } from 'src/mail/mail.service';
 import { GHTKStrategy } from 'src/shipment/strategy/GHTK.strategy';
 import { VIETTELPOSTStrategy } from 'src/shipment/strategy/VIETTELPOST.stratery';
+import { RabbitMQModule } from 'src/rabbitmq/rabbitmq.module';
 
 
 @Module({
-    imports: [HttpModule],
+    imports: [HttpModule, RabbitMQModule],
     controllers: [PaymentController],
-    providers: [PaymentService, PaymentFactory, Momo, ShipmentStrategyFactory, MailService, GHTKStrategy, VIETTELPOSTStrategy],
+    providers: [PaymentService, PaymentFactory, Momo, ShipmentStrategyFactory, MailService,
+        GHTKStrategy, VIETTELPOSTStrategy],
     exports: [PaymentFactory]
 })
 export class PaymentModule { }

@@ -5,6 +5,7 @@ import { ShipmentStrategyFactory } from "src/shipment/strategy/shipment.streateg
 import { PrismaService } from "src/prisma/prisma.service";
 import { MailService } from "src/mail/mail.service";
 import { CreateShipmentDto } from "src/shipment/dto/create-shipment.dto";
+import { RabbitMQService } from "src/rabbitmq/rabbitmq.service";
 
 @Injectable()
 export class PaymentService {
@@ -12,6 +13,7 @@ export class PaymentService {
         private shipmentStrategyFactory: ShipmentStrategyFactory,
         private readonly prisma: PrismaService,
         private readonly mailService: MailService,
+        private readonly rabbitmqService: RabbitMQService,
     ) { }
 
     async createPayment(data: CreatePaymentDTO) {
@@ -48,9 +50,9 @@ export class PaymentService {
         if (data.resultCode === 0) {
 
 
-            const strategy = this.shipmentStrategyFactory.getStrategy(order.partner_id)
-
-            const createOrder = await strategy.createOrder({
+            await this.rabbitmqService.emitEvent('shipment.create_order', {
+                orderId: order.id,
+                partnerId: order.partner_id,
                 senderName: order.sender_name,
                 senderAddress: order.sender_address,
                 receiverName: order.receiver_name,
@@ -59,26 +61,18 @@ export class PaymentService {
                 receiverPhone: order.receiver_phone,
                 description: order.description,
                 price: order.price,
-                partnerId: order.partner_id
-            } as CreateShipmentDto)
-
-            await this.mailService.sendEmailUpdateStatus(user.email, order.status, createOrder.order_code)
+                status: order.status,
+                userEmail: user.email,
+            });
 
             await this.prisma.shipments.update({
-                where: {
-                    id: order.id
-                },
+                where: { id: order.id },
                 data: {
-                    order_code: createOrder.order_code,
-                    payment_status: 'paid'
+                    payment_status: 'paid',
                 }
-            })
-            console.log({
-                messageOrder: 'Đơn hàng được tạo thành công',
-                order: createOrder,
-                messagepayment: 'Trạng thái thanh toán thành công',
-                payment: data
             });
+
+            console.log('✅ Đã emit event shipment.create_order');
         } else {
             await this.prisma.shipments.update({
                 where: {
