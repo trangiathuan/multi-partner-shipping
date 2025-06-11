@@ -16,7 +16,11 @@ export class AuthService {
                 where: { email: data.email },
             });
             if (existingUser) {
-                throw new ForbiddenException('Email đã được đăng ký');
+                return {
+                    EC: -1,
+                    message: 'Email đã được đăng ký',
+                    data: null
+                }
             }
             const password_hash = await UserEntity.hashPassword(data.password);
             const user = await this.prisma.users.create({
@@ -28,7 +32,13 @@ export class AuthService {
                     role: data.role || 'customer',
                 },
             });
-            return user;
+
+            return {
+                EC: 0,
+                message: 'Đăng ký tài khoản thành công',
+                data: user
+            }
+
         } catch (error) {
             throw error;
         }
