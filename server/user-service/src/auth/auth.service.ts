@@ -38,19 +38,28 @@ export class AuthService {
         try {
             const user = await this.prisma.users.findUnique({ where: { email } });
             if (!user) {
-                throw new NotFoundException('Tài khoản không tồn tại');
+                return {
+                    EC: -1,
+                    message: 'Tài khoản không tồn tại',
+                    data: null
+                }
             }
 
             const isPasswordMatch = await UserEntity.isPasswordMatch(password, user.password_hash);
 
             if (!isPasswordMatch) {
-                throw new UnauthorizedException('Mật khẩu không chính xác');
+                return {
+                    EC: -1,
+                    message: 'Mật khẩu không chính xác',
+                    data: null
+                }
             }
 
             const payload = { sub: user.id, role: user.role, email: user.email };
             const { password_hash, ...result } = user;
             return {
-                user: result,
+                EC: 0,
+                data: result,
                 access_token: this.jwtService.sign(payload),
             };
         } catch (error) {

@@ -26,11 +26,7 @@ export class AuthController {
     async login(@Body() body: LoginDto) {
         const response = await this.authService.login(body.email, body.password);
         if (response) {
-            return {
-                EC: 0,
-                message: 'Đăng nhập thành công',
-                data: response,
-            };
+            return response
         }
     }
 }

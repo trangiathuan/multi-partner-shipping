@@ -37,14 +37,8 @@ export class AppController {
 
         if (!serviceUrl) return res.status(404).json({ error: 'Service not found' });
 
-        try {
-            const data = await this.proxyService.forwardRequest(serviceUrl, req);
-            return res.json(data);
-        } catch (err) {
-            console.log('Proxy error:', err?.response?.data || err);
-            const status = err?.response?.status || 500;
-            const data = err?.response?.data || { error: err.message };
-            return res.status(status).json(data);
-        }
+        const data = await this.proxyService.forwardRequest(serviceUrl, req);
+        return res.json(data);
+
     }
 }

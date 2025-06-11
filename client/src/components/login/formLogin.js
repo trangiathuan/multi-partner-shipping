@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Truck } from 'lucide-react';
 import { motion } from "framer-motion";
 import { loginService } from '../../services/authServices'
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function LoginForm() {
     const [formData, setFormData] = useState({
@@ -56,20 +57,25 @@ export default function LoginForm() {
         setIsLoading(true);
         const response = await loginService(formData)
 
+        if (response.EC === 0) {
+            setTimeout(() => {
+                toast.success(response.message);
+                // setIsLoading(false);
+            }, 500);
+        } else {
+            setTimeout(() => {
+                toast.success(response.message);
+                setIsLoading(false);
+            }, 500);
+        }
 
-        // Simulate API call
-        setTimeout(() => {
-            console.log('Login data:', formData);
-            setIsLoading(false);
-            alert('Đăng nhập thành công!');
-        }, 2000);
     };
     const sentence = "Đăng nhập tài khoản của bạn";
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-rose-400 via-rose-500 to-red-600 relative overflow-hidden text-white">
 
-
+            <Toaster />
             {/* Login Form */}
             <div className="relative z-10 w-full max-w-md">
                 {/* Glassmorphism card */}
