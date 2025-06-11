@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Truck } from 'lucide-react';
 import { motion } from "framer-motion";
+import { loginService } from '../../services/authServices'
 
 export default function LoginForm() {
     const [formData, setFormData] = useState({
@@ -39,7 +40,7 @@ export default function LoginForm() {
 
         if (!formData.password) {
             newErrors.password = 'Mật khẩu là bắt buộc';
-        } else if (formData.password.length < 6) {
+        } else if (formData.password.length < 1) {
             newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
         }
 
@@ -53,6 +54,8 @@ export default function LoginForm() {
         if (!validateForm()) return;
 
         setIsLoading(true);
+        const response = await loginService(formData)
+
 
         // Simulate API call
         setTimeout(() => {
