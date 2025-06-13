@@ -14,9 +14,9 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="bg-gray-900 text-white fixed w-full z-10 top-0 shadow-lg">
+        <nav className="bg-red-600 text-white fixed w-full z-10 top-0 shadow-lg">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0">
-                <div className="flex items-center justify-between h-16">
+                <div className="flex items-center justify-between h-15">
                     {/* Logo */}
                     <div className="flex items-center">
                         <Image
@@ -26,7 +26,7 @@ const Navbar = () => {
                             height={50}
                             className="h-8 w-auto"
                         />
-                        <span className="ml-3 text-xl font-semibold">Quản lý Vận chuyển</span>
+                        <span className="ml-3 text-3xl font-bold">T P O S T</span>
                     </div>
 
                     {/* Menu Items */}
@@ -40,28 +40,29 @@ const Navbar = () => {
 
                     {/* Search and Notifications */}
                     <div className="hidden md:flex items-center space-x-4">
-                        <div className="relative">
+                        {/* <div className="relative">
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm đơn hàng..."
-                                className="bg-gray-700 text-white rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="bg-white text-black rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
                             />
                             <i className="fas fa-search absolute right-3 top-3 text-gray-400"></i>
-                        </div>
+                        </div> */}
                         <button className="relative">
                             <i className="fas fa-bell text-xl"></i>
                             <span className="absolute top-0 right-0 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center">
                                 3
                             </span>
                         </button>
-                        <div className="relative">
-                            <Image
-                                src="https://via.placeholder.com/32"
+                        <div className="relative flex items-center">
+                            <img
+                                src="https://res.cloudinary.com/dteuqunrm/image/upload/v1746828829/avtt_htzo9r.png"
                                 alt="User"
                                 width={32}
                                 height={32}
-                                className="rounded-full"
+                                className="rounded-full me-2"
                             />
+                            Xin Chào, Thuận
                         </div>
                     </div>
 
@@ -111,13 +112,13 @@ const Navbar = () => {
                         >
                             <i className="fas fa-cog mr-2"></i>Cài đặt
                         </Link>
-                        <div className="px-3 py-2">
+                        {/* <div className="px-3 py-2">
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm đơn hàng..."
                                 className="w-full bg-gray-700 text-white rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             />
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             )}

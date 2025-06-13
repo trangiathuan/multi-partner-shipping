@@ -60,11 +60,11 @@ export default function LoginForm() {
         if (response.EC === 0) {
             setTimeout(() => {
                 toast.success(response.message);
-                // setIsLoading(false);
+                setIsLoading(false);
             }, 500);
         } else {
             setTimeout(() => {
-                toast.success(response.message);
+                toast.error(response.message);
                 setIsLoading(false);
             }, 500);
         }

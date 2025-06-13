@@ -64,8 +64,6 @@ export class ProxyService {
         });
 
         const response = await lastValueFrom(response$);
-        console.log(response);
-
         return response.data;
     }
 }

@@ -69,6 +69,7 @@ export class AuthService {
             const { password_hash, ...result } = user;
             return {
                 EC: 0,
+                message: 'Đăng nhập thành công',
                 data: result,
                 access_token: this.jwtService.sign(payload),
             };

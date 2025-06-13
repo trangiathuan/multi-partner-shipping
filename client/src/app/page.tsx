@@ -1,6 +1,14 @@
+'use client';
 
-export default function Home() {
+import { BGhome } from "@/components/home/bg-home";
+
+
+const Home = () => {
   return (
-    <div className="text-3xl mt-18 mx-2 bg-gray-500">Hello</div>
+    <div>
+      <BGhome />
+    </div>
   );
-}
+};
+
+export default Home;

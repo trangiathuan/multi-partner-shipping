@@ -19,7 +19,7 @@ const Sidebar = () => {
 
     return (
         <div
-            className={`bg-gray-800 text-white max-h-screen mt-16 top-16 left-0 ${isSidebarOpen ? 'w-44' : 'w-18'}`}
+            className={`bg-red-800 text-white max-h-screen mt-15 top-16 left-0 ${isSidebarOpen ? 'w-44' : 'w-18'}`}
         >
             {/* Toggle Button */}
             <div className="flex p-4 ps-5 space-x-4">
@@ -36,7 +36,7 @@ const Sidebar = () => {
                     <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center space-x-3 p-3 rounded-md hover:bg-gray-700 hover:text-blue-400 transition ${pathname === item.href ? 'bg-gray-700 text-blue-400' : ''}`}
+                        className={`flex items-center space-x-3 p-3 rounded-md hover:bg-red-600  transition ${pathname === item.href ? 'bg-red-600 text-white' : ''}`}
                     >
                         <span>{item.icon}</span>
                         {isSidebarOpen && <span className="text-base font-medium ">{item.name}</span>}
