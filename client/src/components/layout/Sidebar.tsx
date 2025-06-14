@@ -19,7 +19,7 @@ const Sidebar = () => {
 
     return (
         <div
-            className={`bg-red-800 text-white max-h-screen mt-15 top-16 left-0 ${isSidebarOpen ? 'w-44' : 'w-18'}`}
+            className={`bg-red-800 text-white min-h-screen mt-15 top-16 left-0 ${isSidebarOpen ? 'w-44' : 'w-18'}`}
         >
             {/* Toggle Button */}
             <div className="flex p-4 ps-5 space-x-4">
