@@ -101,7 +101,7 @@ const InforReceiver = () => {
                         </p>
                     </div>
                 </div>
-                <button className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full text-white font-bold">
+                <button className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full text-white font-bold my-auto">
                     Thay đổi
                 </button>
             </div>

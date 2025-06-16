@@ -24,7 +24,9 @@ export default function RootLayout({
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+          title="Hệ Thống Vận Chuyển Đa Đối Tác"
         />
+        <title>Hệ Thống Vận Chuyển Đa Đối Tác</title>
       </head>
       <body>
         {isAuthPage ? (
