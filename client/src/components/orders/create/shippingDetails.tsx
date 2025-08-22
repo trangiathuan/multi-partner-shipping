@@ -1,5 +1,5 @@
 import React from 'react'
-import { Package, DollarSign, Weight, Banknote, X } from 'lucide-react';
+import { Package, DollarSign, Weight, Banknote, X, NotepadText } from 'lucide-react';
 
 const ShippingDetails = () => {
     return (
@@ -158,8 +158,28 @@ const ShippingDetails = () => {
                         </div>
                     </div>
                 </div>
+                <div className='p-5'>
+                    <div className='flex '>
+                        <p className="font-semibold mb-2">
+                            Ghi chú
+                        </p>
+                    </div>
+
+                    <div>
+
+                        <div className='relative'>
+                            <textarea
+                                placeholder='Ghi chú đơn hàng'
+                                className='w-full h-32 ps-10 pt-2 pb-2 resize-none border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-red-600 placeholder:text-gray-400' />
+                            <div className='absolute top-3 left-3'>
+                                <NotepadText className='w-5 h-5 text-gray-400' />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
-        </div>
+        </div >
     )
 }
 export default ShippingDetails
